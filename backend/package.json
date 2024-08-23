@@ -4,7 +4,8 @@
   "description": "backend for phonebook",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
+    "install:dotenv": "npm install dotenv",
+    "start": "npm run install:dotenv && node index.js",
     "dev": "nodemon index.js",
     "build": "echo \"No build step required\"",
     "build:ui": "rm -rf dist && cd /d/dev/FullStackOpen/FullStackOpen-Submissions/part2/phoneinfo && npm run build && cp -r dist /d/dev/FullStackOpen/phoneBook/backend",
