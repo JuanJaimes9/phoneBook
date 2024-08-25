@@ -2,29 +2,24 @@ require("dotenv").config();
 const express = require("express");
 const morgan = require("morgan");
 const cors = require("cors");
+const mongoose = require("mongoose");
+const Person = require("./models/person");
 
 const errorHandler = (error, request, response, next) => {
   console.error(error.message);
 
   if (error.name === "CastError") {
     return response.status(400).send({ error: "malformatted id" });
-  } else if (
-    error.name === "ValidationError" ||
-    error.number === "ValidationError"
-  ) {
+  } else if (error.name === "ValidationError") {
     return response.status(400).json({ error: error.message });
   }
 
   next(error);
 };
 
-const mongoose = require("mongoose");
-const Person = require("./models/person");
-
 const url = process.env.MONGODB_URI;
 
 mongoose.set("strictQuery", false);
-
 mongoose.connect(url, { useNewUrlParser: true, useUnifiedTopology: true });
 
 const app = express();
@@ -53,8 +48,7 @@ app.get("/api/persons", (request, response) => {
 });
 
 app.get("/api/persons/:id", (request, response, next) => {
-  const id = request.params.id;
-  Person.findById(id)
+  Person.findById(request.params.id)
     .then((person) => {
       if (person) {
         response.json(person);
@@ -67,11 +61,6 @@ app.get("/api/persons/:id", (request, response, next) => {
 
 app.put("/api/persons/:id", (request, response, next) => {
   const { name, number } = request.body;
-
-  const person = {
-    name: body.name,
-    number: body.number,
-  };
 
   Person.findByIdAndUpdate(
     request.params.id,
@@ -87,21 +76,21 @@ app.put("/api/persons/:id", (request, response, next) => {
 const generateId = () => Math.floor(Math.random() * 100);
 
 app.post("/api/persons", (request, response, next) => {
-  const body = request.body;
+  const { name, number } = request.body;
 
-  if (!body.name || !body.number) {
+  if (!name || !number) {
     return response.status(400).json({ error: "Name or number missing" });
   }
 
-  Person.findOne({ name: body.name })
+  Person.findOne({ name })
     .then((existingPerson) => {
       if (existingPerson) {
         return response.status(406).json({ error: "Name must be unique" });
       }
 
       const person = new Person({
-        name: body.name,
-        number: body.number,
+        name,
+        number,
         id: generateId(),
       });
 
@@ -111,13 +100,10 @@ app.post("/api/persons", (request, response, next) => {
     .catch((error) => next(error));
 });
 
-app.delete("/api/persons/:id", (request, response) => {
-  const id = request.params.id;
-  Person.findByIdAndDelete(id)
+app.delete("/api/persons/:id", (request, response, next) => {
+  Person.findByIdAndDelete(request.params.id)
     .then(() => response.status(204).end())
-    .catch((error) =>
-      response.status(500).json({ error: "Failed to delete person" })
-    );
+    .catch((error) => next(error));
 });
 
 app.get("/info", (req, resp) => {
