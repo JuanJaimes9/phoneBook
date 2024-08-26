@@ -10,7 +10,8 @@
     "build": "echo \"No build step required\"",
     "build:ui": "rm -rf dist && cd /d/dev/FullStackOpen/FullStackOpen-Submissions/part2/phoneinfo && npm run build && cp -r dist /d/dev/FullStackOpen/phoneBook/backend",
     "deploy:full": "npm run build:ui && git add . && git commit -m uibuild && git push",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "eslint ."
   },
   "author": "",
   "license": "ISC",
@@ -22,6 +23,10 @@
     "morgan": "^1.10.0"
   },
   "devDependencies": {
+    "@eslint/js": "^9.9.1",
+    "@stylistic/eslint-plugin-js": "^2.6.4",
+    "eslint": "^9.9.1",
+    "globals": "^15.9.0",
     "nodemon": "^3.1.4"
   }
 }
